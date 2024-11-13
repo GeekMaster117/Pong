@@ -1,0 +1,12 @@
+package functionalities.subFunctionalites;
+
+import java.net.Socket;
+
+public interface OnlineInterfaceQuirks
+{
+	public String getIPV4();
+	
+	public void setClientSocket(Socket conn);
+	
+	public Socket getClientSocket();
+}

@@ -1,0 +1,38 @@
+1716138315300	Delete element
+1716138323476	Delete element
+1716188170332	Delete element
+1716189668896	Delete element
+1716190480112	Delete element
+1716190530912	Rename package 'subFunctionalities'
+1716190883042	Delete element
+1716190898753	Rename type 'Functionalities'
+1716190985573	Rename type 'InputHandler'
+1716194552509	Delete element
+1716224130106	Delete element
+1716224162571	Delete element
+1716224987663	Delete element
+1716224990812	Delete element
+1716225023103	Rename package 'server'
+1716289338409	Rename type 'Menu'
+1716311634609	Rename type 'HostServer'
+1716317037859	Delete element
+1716368406243	Move compilation unit
+1716369896802	Rename type 'Positions'
+1716374233077	Delete element
+1716375016006	Rename type 'PlayerName'
+1716378970501	Rename type 'StartServer'
+1716401745870	Rename field 'str'
+1716401807447	Rename field 'str'
+1716459556640	Rename type 'connectionStatus'
+1716459729004	Move type
+1716477069263	Delete element
+1716477072980	Delete element
+1716477311632	Delete element
+1716653016584	Delete element
+1716653124322	Rename type 'HostServerMenu'
+1716653511816	Rename type 'HostMenu'
+1716653522707	Rename type 'Lobby'
+1716653704511	Rename method 'handleHostServerMenu'
+1716653771841	Delete element
+1716654168168	Rename type 'InetQuirks'
+1716655066447	Rename type 'ConnectionMenu'

@@ -1,0 +1,16 @@
+package functionalities.subFunctionalites;
+
+import java.net.Socket;
+
+import onlineFramework.ServerHandle;
+
+public interface SetterGetter
+{
+	public void setPlayerName(String playerName);
+	
+	public String getPlayerName();
+	
+	public void setSocket(Socket conn);
+	
+	public Socket getSocket();
+}

@@ -1,0 +1,23 @@
+package game;
+
+import onlineFramework.Server;
+
+public class HostServer extends Thread
+{
+	
+	public void run()
+	{
+		Server server = new Server();
+		this.server.start();
+	}
+	
+	public void startServer()
+	{
+		this.start();
+	}
+	
+	public void endServer()
+	{
+		this.server.end();
+	}
+}

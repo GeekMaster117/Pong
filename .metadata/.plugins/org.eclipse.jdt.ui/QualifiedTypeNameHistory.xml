@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<qualifiedTypeNameHistroy>
+    <fullyQualifiedTypeName name="server.PlayerThread"/>
+    <fullyQualifiedTypeName name="java.io.DataOutputStream"/>
+    <fullyQualifiedTypeName name="java.io.DataInputStream"/>
+    <fullyQualifiedTypeName name="java.nio.file.Path"/>
+    <fullyQualifiedTypeName name="java.net.URL"/>
+    <fullyQualifiedTypeName name="java.io.IOException"/>
+    <fullyQualifiedTypeName name="java.awt.event.KeyListener"/>
+    <fullyQualifiedTypeName name="javax.swing.JPanel"/>
+    <fullyQualifiedTypeName name="com.github.kwhat.jnativehook.GlobalScreen"/>
+    <fullyQualifiedTypeName name="com.github.kwhat.jnativehook.NativeHookException"/>
+    <fullyQualifiedTypeName name="game.Menu"/>
+    <fullyQualifiedTypeName name="java.lang.Thread"/>
+    <fullyQualifiedTypeName name="engine.Screen"/>
+    <fullyQualifiedTypeName name="java.util.List"/>
+    <fullyQualifiedTypeName name="java.util.ArrayList"/>
+    <fullyQualifiedTypeName name="functionalities.subFunctionalites.Positions"/>
+    <fullyQualifiedTypeName name="functionalities.subFunctionalites.DisplayQuirks"/>
+    <fullyQualifiedTypeName name="functionalities.subFunctionalites.MenuList"/>
+    <fullyQualifiedTypeName name="com.github.kwhat.jnativehook.keyboard.NativeKeyListener"/>
+    <fullyQualifiedTypeName name="onlineFramework.Server"/>
+    <fullyQualifiedTypeName name="java.net.Inet4Address"/>
+    <fullyQualifiedTypeName name="java.net.Inet6Address"/>
+    <fullyQualifiedTypeName name="java.util.Enumeration"/>
+    <fullyQualifiedTypeName name="java.net.NetworkInterface"/>
+    <fullyQualifiedTypeName name="java.net.InetAddress"/>
+    <fullyQualifiedTypeName name="java.net.SocketException"/>
+    <fullyQualifiedTypeName name="onlineFramework.ClientHandle"/>
+    <fullyQualifiedTypeName name="onlineFramework.Client.connectionStatus"/>
+    <fullyQualifiedTypeName name="functionalities.subFunctionalites.ConnectionStatus"/>
+    <fullyQualifiedTypeName name="java.net.ServerSocket"/>
+    <fullyQualifiedTypeName name="functionalities.Functionalities"/>
+    <fullyQualifiedTypeName name="engine.Canvas"/>
+    <fullyQualifiedTypeName name="onlineFramework.ServerHandle"/>
+    <fullyQualifiedTypeName name="java.net.Socket"/>
+    <fullyQualifiedTypeName name="com.github.kwhat.jnativehook.keyboard.NativeKeyEvent"/>
+    <fullyQualifiedTypeName name="java.io.OutputStream"/>
+    <fullyQualifiedTypeName name="java.io.InputStream"/>
+    <fullyQualifiedTypeName name="java.io.ObjectOutputStream"/>
+    <fullyQualifiedTypeName name="java.io.ObjectInputStream"/>
+    <fullyQualifiedTypeName name="boot.Master"/>
+    <fullyQualifiedTypeName name="onlineFramework.Server.display"/>
+    <fullyQualifiedTypeName name="onlineFramework.Server.LobbySelect"/>
+    <fullyQualifiedTypeName name="engine.Entity"/>
+    <fullyQualifiedTypeName name="java.util.Map"/>
+</qualifiedTypeNameHistroy>
