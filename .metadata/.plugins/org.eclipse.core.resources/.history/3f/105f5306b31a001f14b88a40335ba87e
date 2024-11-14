@@ -1,6 +1,0 @@
-package functionalities.subFunctionalites;
-
-public interface InetQuirks
-{
-	public String getIPV4();
-}

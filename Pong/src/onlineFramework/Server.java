@@ -129,6 +129,15 @@ public class Server extends Functionalities
 					2, 1);
 	}
 	
+	private void displayLevel(Canvas background)
+	{
+		background.insertYLine('|',
+				this.getMiddleXPosition(background.getWidth(), 1),
+				0,
+				this.getMiddleXPosition(background.getWidth(), 1),
+				background.getHeight() - 1);
+	}
+	
 	private void startGame()
 	{
 		String str = "Starting in ";
@@ -153,7 +162,28 @@ public class Server extends Functionalities
 			this.countdown = 6;
 		
 		if(this.countdown <= 0)
+		{
 			this.currentDisplay = display.Level;
+			
+			this.ready1 = false;
+    		this.ready2 = false;
+    		
+    		this.selectPointer1 = 0;
+    		this.selectPointer2 = 0;
+			
+//			Thread ballSimulation = new Thread(() -> {
+//				try
+//				{
+//					Thread.sleep(2000);
+//				}
+//				catch (InterruptedException e)
+//				{
+//					e.printStackTrace();
+//				}
+				this.ball.startSimluation();
+//			});
+//			ballSimulation.start();
+		}
 	}
 	
 	private void handleLobbyInput(NativeKeyEvent e, ClientHandle player)
@@ -205,15 +235,6 @@ public class Server extends Functionalities
 		}
 	}
 	
-	private void displayLevel(Canvas background)
-	{
-		background.insertYLine('|',
-				this.getMiddleXPosition(background.getWidth(), 1),
-				0,
-				this.getMiddleXPosition(background.getWidth(), 1),
-				background.getHeight() - 1);
-	}
-	
 	private void handleLevelInput(NativeKeyEvent e, Entity paddle)
 	{
 		if(e == null)
@@ -236,11 +257,14 @@ public class Server extends Functionalities
         try
         {	
         	this.serverSocket = new ServerSocket(12345);
+        	
         	this.background1 = new Canvas(120, 30);
         	this.background2 = new Canvas(120, 30);
         	
         	this.paddle1 = new Entity();
         	this.paddle2 = new Entity();
+        	this.ball = new Entity();
+        	
         	this.paddle1.setDimensions(1, 4);
         	this.paddle2.setDimensions(1, 4);
         	this.paddle1.setPosition(1, 
@@ -249,6 +273,11 @@ public class Server extends Functionalities
         			this.getMiddleYPosition(this.background2.getHeight(), this.paddle2.getHeight()));
         	this.paddle1.setPaintChar(']');
         	this.paddle2.setPaintChar('[');
+        	
+        	this.ball.setPaintChar('*');
+        	this.ball.setPosition(60, 15);
+			this.ball.setHorVelocity(-2);
+			this.ball.setHorAcceleration(-0.1);
 
             this.player1 = new ClientHandle(this.serverSocket);
             this.player2 = new ClientHandle(this.serverSocket);
@@ -293,13 +322,7 @@ public class Server extends Functionalities
                 	this.startGame();
             	}
             	else if(this.currentDisplay == display.Level)
-            	{
-            		this.ready1 = false;
-            		this.ready2 = false;
-            		
-            		this.selectPointer1 = 0;
-            		this.selectPointer2 = 0;
-            		
+            	{	
             		if(System.currentTimeMillis() - this.prevTime > 150)
             		{
             			this.prevTime = System.currentTimeMillis();
@@ -314,6 +337,33 @@ public class Server extends Functionalities
                     this.paddle1.displayEntity(this.background2);
                     this.paddle2.displayEntity(this.background1);
                     this.paddle2.displayEntity(this.background2);
+                    
+                    if(this.ball.detectClipping(this.paddle1))
+                    {
+                    	this.ball.stopSimulation();
+                    	this.ball.undoClipping(this.paddle1, 3, false);
+                    	this.ball.startSimluation();
+                    }
+                    else if(this.ball.detectClipping(this.paddle2))
+                    {
+                    	this.ball.stopSimulation();
+                    	this.ball.undoClipping(this.paddle2, 3, false);
+                    	this.ball.startSimluation();
+                    }
+                    
+                    if(this.ball.detectCollision(this.paddle1))
+                    {
+                    	this.ball.setHorVelocity(Math.abs(this.ball.getHorVelocity()));
+                    	this.ball.setHorAcceleration(Math.abs(this.ball.getHorAcceleration()));
+                    }
+                    else if(this.ball.detectCollision(this.paddle2))
+                    {
+                    	this.ball.setHorVelocity(-Math.abs(this.ball.getHorVelocity()));
+                    	this.ball.setHorAcceleration(-Math.abs(this.ball.getHorAcceleration()));
+                    }
+                    
+                    this.ball.displayEntity(this.background1);
+                    this.ball.displayEntity(this.background2);
             	}
             	
             	this.displayBorders(this.background1);
