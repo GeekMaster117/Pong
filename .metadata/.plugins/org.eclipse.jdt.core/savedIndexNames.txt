@@ -1,8 +1,0 @@
-INDEX VERSION 1.131+D:\Projects\Pong\.metadata\.plugins\org.eclipse.jdt.core
-972009939.index
-798024249.index
-3899740229.index
-2479966978.index
-386029083.index
-1865797976.index
-2616190138.index
