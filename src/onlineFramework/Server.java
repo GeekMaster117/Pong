@@ -16,6 +16,7 @@ public class Server extends Functionalities
     private Canvas[] backgrounds;
     private Entity[] paddles;
     private Entity ball;
+    private Entity walls[];
     
     private enum LobbySelect
 	{	
@@ -240,6 +241,7 @@ public class Server extends Functionalities
     	this.backgrounds = new Canvas[2];
     	this.paddles = new Entity[2];
     	this.ball = new Entity();
+    	this.walls = new Entity[4];
     	this.selectPointers = new int[2];
     	this.readyStatus = new boolean[2];
     	
@@ -253,14 +255,32 @@ public class Server extends Functionalities
         		
         		this.paddles[i] = new Entity();
         		this.paddles[i].setDimensions(1, 5);
-        		this.paddles[i].setPosition((i == 0) ? 1 : this.backgrounds[i].getWidth() - 1, 
+        		this.paddles[i].setPosition((i == 0) ? 1 : this.backgrounds[i].getWidth() - 2, 
             			this.getMiddleYPosition(this.backgrounds[i].getHeight(), this.paddles[i].getHeight()));
         		this.paddles[i].setPaintChar((i == 0) ? ']' : '[');
         	}
+        	for(int i = 0; i < 4; ++i)
+        		this.walls[i] = new Entity();
         	
         	this.ball.setPaintChar('*');
         	this.ball.setPosition(60, 15);
 			this.ball.setHorVelocity(-6);
+			
+			this.walls[0].setPaintChar('-');
+			this.walls[0].setPosition(0, 0);
+			this.walls[0].setWidth(this.backgrounds[0].getWidth());
+			
+			this.walls[1].setPaintChar('-');
+			this.walls[1].setPosition(0, this.backgrounds[0].getHeight() - 1);
+			this.walls[1].setWidth(this.backgrounds[0].getWidth());
+			
+			this.walls[2].setPaintChar('|');
+			this.walls[2].setPosition(0, 1);
+			this.walls[2].setHeight(this.backgrounds[0].getHeight() - 2);
+			
+			this.walls[3].setPaintChar('|');
+			this.walls[3].setPosition(this.backgrounds[0].getWidth() - 1, 1);
+			this.walls[3].setHeight(this.backgrounds[0].getHeight() - 2);
 			
 			for(int i = 0; i < 2; ++i)
 			{
@@ -315,14 +335,15 @@ public class Server extends Functionalities
             		{
             			this.displayLevel(this.backgrounds[i]);
             			
-            			for(Entity paddle : this.paddles)
-            				paddle.displayEntity(this.backgrounds[i]);
+            			Entity.displayEntities(this.paddles, this.backgrounds[i]);
+            			Entity.displayEntities(this.walls, this.backgrounds[i]);
             			
             			this.ball.undoClipping(this.paddles[i], 3, false);
             			
             			this.handleBallTrajectory(this.ball, this.paddles[i]);
             			
-            			this.ball.bounceOf(this.paddles[i]);
+            			this.ball.bounceOfMultiple(this.paddles);
+            			this.ball.bounceOfMultiple(this.walls);
             			
             			this.ball.displayEntity(this.backgrounds[i]);
             		}
