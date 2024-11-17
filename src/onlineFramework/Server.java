@@ -12,12 +12,9 @@ import functionalities.Functionalities;
 public class Server extends Functionalities
 {
     private ServerSocket serverSocket;
-    private ClientHandle player1;
-    private ClientHandle player2;
-    private Canvas background1;
-    private Canvas background2;
-    private Entity paddle1;
-    private Entity paddle2;
+    private ClientHandle[] players;
+    private Canvas[] backgrounds;
+    private Entity[] paddles;
     private Entity ball;
     
     private enum LobbySelect
@@ -44,8 +41,8 @@ public class Server extends Functionalities
     
     private boolean exitStatus = false;
     
-    private int selectPointer1 = 0, selectPointer2 = 0;
-    private boolean ready1 = false, ready2 = false;
+    private int[] selectPointers;
+    private boolean[] readyStatus;
     
     private void displayServerIP(Canvas background)
 	{
@@ -60,10 +57,12 @@ public class Server extends Functionalities
 	private void displayLobby(Canvas background)
 	{
 		int width = 50;
-		String player1Name = (this.player1.getPlayerName() == null) ? "Waiting to Join..." : this.player1.getPlayerName();
-		String player2Name = (this.player2.getPlayerName() == null) ? "Waiting to Join..." : this.player2.getPlayerName();
-		String ready1Status = (this.ready1 == true) ? "Ready" : "Not Ready";
-		String ready2Status = (this.ready2 == true) ? "Ready" : "Not Ready";
+		String[] playerNames = new String[2], readyMessages = new String[2];
+		for(int i = 0; i < 2; ++i)
+		{
+			playerNames[i] = (this.players[i].getPlayerName() == null) ? "Waiting to Join..." : this.players[i].getPlayerName();
+			readyMessages[i] = (this.readyStatus[i] == true) ? "Ready" : "Not Ready";
+		}
 		background.insertXLine('|',
 				this.getMiddleXPosition(background.getWidth(), width),
 				5,
@@ -90,28 +89,20 @@ public class Server extends Functionalities
 				this.getMiddleXPosition(background.getWidth(), width) + width - 1,
 				7);
 		
-		background.insertString(player1Name,
-				this.getMiddleXPosition(background.getWidth(), width) + 2,
-				6,
-				player1Name.length(),
-				1);
-		if(this.player1.getPlayerName() != null)
-			background.insertString(ready1Status,
-					this.getMiddleXPosition(background.getWidth(), width) + width - ready1Status.length() - 2,
-					6,
-					ready1Status.length(),
+		for(int i = 0; i < 2; ++i)
+		{
+			background.insertString(playerNames[i],
+					this.getMiddleXPosition(background.getWidth(), width) + 2,
+					(i == 0) ? 6 : 8,
+					playerNames[i].length(),
 					1);
-		background.insertString(player2Name,
-				this.getMiddleXPosition(background.getWidth(), width) + 2,
-				8,
-				player2Name.length(),
-				1);
-		if(this.player2.getPlayerName() != null)
-			background.insertString(ready2Status,
-					this.getMiddleXPosition(background.getWidth(), width) + width - ready2Status.length() - 2,
-					8,
-					ready2Status.length(),
-					1);
+			if(this.players[i].getPlayerName() != null)
+				background.insertString(readyMessages[i],
+						this.getMiddleXPosition(background.getWidth(), width) + width - readyMessages[i].length() - 2,
+						(i == 0) ? 6 : 8,
+						readyMessages[i].length(),
+						1);
+		}
 	}
 	
 	private void displayEnum(LobbySelect s, int offsetX, int offsetY, Canvas background, boolean showPointer)
@@ -141,18 +132,14 @@ public class Server extends Functionalities
 	private void startGame()
 	{
 		String str = "Starting in ";
-		if(this.ready1 && this.ready2)
+		if(this.readyStatus[0] && this.readyStatus[1])
 		{
-			this.background1.insertString(str + String.valueOf(this.countdown),
-					this.getMiddleXPosition(this.background1.getWidth(), str.length() + 1),
-					19,
-					str.length() + 1,
-					1);
-			this.background2.insertString(str + String.valueOf(this.countdown),
-					this.getMiddleXPosition(this.background1.getWidth(), str.length() + 1),
-					19,
-					str.length() + 1,
-					1);
+			for(Canvas background : this.backgrounds)
+				background.insertString(str + String.valueOf(this.countdown),
+						this.getMiddleXPosition(background.getWidth(), str.length() + 1),
+						19,
+						str.length() + 1,
+						1);
 			if(System.currentTimeMillis() - this.prevTime < 1000)
 				return;
 			this.prevTime = System.currentTimeMillis();
@@ -165,24 +152,13 @@ public class Server extends Functionalities
 		{
 			this.currentDisplay = display.Level;
 			
-			this.ready1 = false;
-    		this.ready2 = false;
-    		
-    		this.selectPointer1 = 0;
-    		this.selectPointer2 = 0;
+			for(int i = 0; i < 2; ++i)
+			{
+				this.readyStatus[i] = false;
+				this.selectPointers[i] = 0;
+			}
 			
-//			Thread ballSimulation = new Thread(() -> {
-//				try
-//				{
-//					Thread.sleep(2000);
-//				}
-//				catch (InterruptedException e)
-//				{
-//					e.printStackTrace();
-//				}
-				this.ball.startSimluation();
-//			});
-//			ballSimulation.start();
+			this.ball.startSimluation();
 		}
 	}
 	
@@ -190,45 +166,30 @@ public class Server extends Functionalities
 	{
 		if(e == null)
 			return;
+		int index = 0;
+		if(player.equals(this.players[1]))
+			index = 1;
 		switch(e.getKeyCode())
 		{
 			case NativeKeyEvent.VC_UP:
-				if(player.equals(this.player1))
-					this.selectPointer1 = Math.max(this.selectPointer1 - 1, 0);
-				else if(player.equals(this.player2))
-					this.selectPointer2 = Math.max(this.selectPointer2 - 1, 0);
+				this.selectPointers[index] = Math.max(this.selectPointers[index] - 1, 0);
 				break;
 			case NativeKeyEvent.VC_DOWN:
-				if(player.equals(this.player1))
-				{
-					this.selectPointer1 = Math.min(this.selectPointer1 + 1, LobbySelect.values().length - 1);
-				}
-				else if(player.equals(player2))
-					this.selectPointer2 = Math.min(this.selectPointer2 + 1, LobbySelect.values().length - 1);
+				this.selectPointers[index] = Math.min(this.selectPointers[index] + 1, LobbySelect.values().length - 1);
 				break;
 			case NativeKeyEvent.VC_ENTER:
-				if(player.equals(this.player1))
+				if(LobbySelect.values()[this.selectPointers[index]] == LobbySelect.Toggle_Ready)
+					this.readyStatus[index] = !this.readyStatus[index];
+				else
 				{
-					if(LobbySelect.values()[selectPointer1] == LobbySelect.Toggle_Ready)
-						this.ready1 = !ready1;
-					else
+					this.selectPointers[index] = 0;
+					this.readyStatus[index] = false;
+					this.players[index].end();
+					
+					if(index == 0)
 					{
-						this.selectPointer1 = 0;
-						this.ready1 = false;
-						this.player1.end();
 						this.exitStatus = true;
 						this.end();
-					}
-				}
-				else if(player.equals(this.player2))
-				{
-					if(LobbySelect.values()[selectPointer2] == LobbySelect.Toggle_Ready)
-						this.ready2 = !ready2;
-					else
-					{
-						this.selectPointer2 = 0;
-						this.ready2 = false;
-						this.player2.end();
 					}
 				}
 				break;
@@ -243,7 +204,7 @@ public class Server extends Functionalities
 		{
 			case NativeKeyEvent.VC_DOWN:
 				paddle.setPosition(paddle.getXPosition(),
-						Math.min(paddle.getYPosition() + 1, this.background1.getHeight() - paddle.getHeight() - 1));
+						Math.min(paddle.getYPosition() + 1, this.backgrounds[0].getHeight() - paddle.getHeight() - 1));
 				break;
 			case NativeKeyEvent.VC_UP:
 				paddle.setPosition(paddle.getXPosition(),
@@ -251,41 +212,63 @@ public class Server extends Functionalities
 				break;
 		}
 	}
+	
+	private void handleBallTrajectory(Entity ball, Entity paddle)
+	{
+		if(!ball.detectCollision(paddle))
+			return;
+		if((ball.getXPosition() - paddle.getXPosition()) * ball.getHorVelocity() > 0)
+			return;
+		
+		int paddleHalfLength = (int) Math.floor(paddle.getHeight() / 2);
+		int paddleHitLocation = (ball.getYPosition() - paddle.getYPosition()) + 1;
+		double paddleVerVelocityChange = 0;
+		
+		if(paddleHitLocation <= paddleHalfLength)
+			paddleVerVelocityChange = -paddleHalfLength / paddleHitLocation;
+		else if((paddle.getHeight() % 2 == 0 && paddleHitLocation > paddleHalfLength) 
+				|| 
+				(paddle.getHeight() % 2 != 0 && paddleHitLocation > paddleHalfLength + 1))
+			paddleVerVelocityChange = paddleHalfLength / ((paddle.getHeight() - paddleHitLocation) + 1);
+		
+		ball.setVerVelocity(ball.getVerVelocity() + paddleVerVelocityChange);
+	}
     
     public void start()
     {
+    	this.players = new ClientHandle[2];
+    	this.backgrounds = new Canvas[2];
+    	this.paddles = new Entity[2];
+    	this.ball = new Entity();
+    	this.selectPointers = new int[2];
+    	this.readyStatus = new boolean[2];
+    	
         try
         {	
         	this.serverSocket = new ServerSocket(12345);
         	
-        	this.background1 = new Canvas(120, 30);
-        	this.background2 = new Canvas(120, 30);
-        	
-        	this.paddle1 = new Entity();
-        	this.paddle2 = new Entity();
-        	this.ball = new Entity();
-        	
-        	this.paddle1.setDimensions(1, 4);
-        	this.paddle2.setDimensions(1, 4);
-        	this.paddle1.setPosition(1, 
-        			this.getMiddleYPosition(this.background1.getHeight(), this.paddle1.getHeight()));
-        	this.paddle2.setPosition(this.background2.getWidth() - 2,
-        			this.getMiddleYPosition(this.background2.getHeight(), this.paddle2.getHeight()));
-        	this.paddle1.setPaintChar(']');
-        	this.paddle2.setPaintChar('[');
+        	for(int i = 0; i < 2; ++i)
+        	{
+        		this.backgrounds[i] = new Canvas(120, 30);
+        		
+        		this.paddles[i] = new Entity();
+        		this.paddles[i].setDimensions(1, 5);
+        		this.paddles[i].setPosition((i == 0) ? 1 : this.backgrounds[i].getWidth() - 1, 
+            			this.getMiddleYPosition(this.backgrounds[i].getHeight(), this.paddles[i].getHeight()));
+        		this.paddles[i].setPaintChar((i == 0) ? ']' : '[');
+        	}
         	
         	this.ball.setPaintChar('*');
         	this.ball.setPosition(60, 15);
-			this.ball.setHorVelocity(-2);
-			this.ball.setHorAcceleration(-0.1);
-
-            this.player1 = new ClientHandle(this.serverSocket);
-            this.player2 = new ClientHandle(this.serverSocket);
+			this.ball.setHorVelocity(-6);
+			
+			for(int i = 0; i < 2; ++i)
+			{
+				this.players[i] = new ClientHandle(this.serverSocket);
+				this.players[i].setName("Player" + String.valueOf(i + 1));
+			}
             
-            this.player1.setName("Player1");
-            this.player2.setName("Player2");
-            
-            this.player1.start();
+            this.players[0].start();
             try 
             {
 				Thread.sleep(100);
@@ -294,30 +277,28 @@ public class Server extends Functionalities
             {
 				e.printStackTrace();
 			}
-            this.player2.start();
+            this.players[1].start();
             
             while(!this.exitStatus)
             {
-            	this.background1.clearCanvas();
-            	this.background2.clearCanvas();
+            	for(Canvas background : this.backgrounds)
+            		background.clearCanvas();
             	
             	if(this.currentDisplay == display.Lobby)
             	{
-            		this.handleLobbyInput(this.player1.getPlayerInput(), this.player1);
-            		this.player1.setPlayerInput(null);
-                    this.handleLobbyInput(this.player2.getPlayerInput(), this.player2);
-                    this.player2.setPlayerInput(null);
-                    
-                    this.displayServerIP(this.background1);
-                    this.displayServerIP(this.background2);
-                	this.displayLobby(this.background1);
-                	this.displayLobby(this.background2);
-
-                	for(int i = 0; i < LobbySelect.values().length; ++i)
-                	{
-                		this.displayEnum(LobbySelect.values()[i], 0, 2 * i, this.background1, this.selectPointer1 == i);
-                		this.displayEnum(LobbySelect.values()[i], 0, 2 * i, this.background2, this.selectPointer2 == i);
-                	}
+            		for(int i = 0; i < 2; ++i)
+            		{
+            			this.handleLobbyInput(this.players[i].getPlayerInput(), this.players[i]);
+                		this.players[i].setPlayerInput(null);
+                		
+                		this.displayServerIP(this.backgrounds[i]);
+                		this.displayLobby(this.backgrounds[i]);
+                		
+                		for(int j = 0; j < LobbySelect.values().length; ++j)
+                    		this.displayEnum(LobbySelect.values()[j], 0, 2 * j, this.backgrounds[i], this.selectPointers[i] == j);
+                		
+                		this.displayBorders(this.backgrounds[i]);
+            		}
                 	
                 	this.startGame();
             	}
@@ -326,65 +307,37 @@ public class Server extends Functionalities
             		if(System.currentTimeMillis() - this.prevTime > 150)
             		{
             			this.prevTime = System.currentTimeMillis();
-                		this.handleLevelInput(this.player1.getPlayerInput(), this.paddle1);
-                        this.handleLevelInput(this.player2.getPlayerInput(), this.paddle2);
+            			for(int i = 0; i < 2; ++i)
+            				this.handleLevelInput(this.players[i].getPlayerInput(), this.paddles[i]);
             		}
                     
-                    this.displayLevel(this.background1);
-                    this.displayLevel(this.background2);
-                    
-                    this.paddle1.displayEntity(this.background1);
-                    this.paddle1.displayEntity(this.background2);
-                    this.paddle2.displayEntity(this.background1);
-                    this.paddle2.displayEntity(this.background2);
-                    
-                    if(this.ball.detectClipping(this.paddle1))
-                    {
-                    	this.ball.stopSimulation();
-                    	this.ball.undoClipping(this.paddle1, 3, false);
-                    	this.ball.startSimluation();
-                    }
-                    else if(this.ball.detectClipping(this.paddle2))
-                    {
-                    	this.ball.stopSimulation();
-                    	this.ball.undoClipping(this.paddle2, 3, false);
-                    	this.ball.startSimluation();
-                    }
-                    
-                    if(this.ball.detectCollision(this.paddle1))
-                    {
-                    	this.ball.setHorVelocity(Math.abs(this.ball.getHorVelocity()));
-                    	this.ball.setHorAcceleration(Math.abs(this.ball.getHorAcceleration()));
-                    }
-                    else if(this.ball.detectCollision(this.paddle2))
-                    {
-                    	this.ball.setHorVelocity(-Math.abs(this.ball.getHorVelocity()));
-                    	this.ball.setHorAcceleration(-Math.abs(this.ball.getHorAcceleration()));
-                    }
-                    
-                    this.ball.displayEntity(this.background1);
-                    this.ball.displayEntity(this.background2);
+            		for(int i = 0; i < 2; ++i)
+            		{
+            			this.displayLevel(this.backgrounds[i]);
+            			
+            			for(Entity paddle : this.paddles)
+            				paddle.displayEntity(this.backgrounds[i]);
+            			
+            			this.ball.undoClipping(this.paddles[i], 3, false);
+            			
+            			this.handleBallTrajectory(this.ball, this.paddles[i]);
+            			
+            			this.ball.bounceOf(this.paddles[i]);
+            			
+            			this.ball.displayEntity(this.backgrounds[i]);
+            		}
             	}
             	
-            	this.displayBorders(this.background1);
-            	this.displayBorders(this.background2);
-            	
-            	this.player1.setDisplay(this.background1.getData());
-            	this.player2.setDisplay(this.background2.getData());
-            	
-            	if(this.player1.isInterrupted())
+            	for(int i = 0; i < 2; ++i)
             	{
-            		this.player1 = new ClientHandle(this.serverSocket);
-            		this.player1.setName("Player1");
-            		this.player1.start();
-            		this.currentDisplay = display.Lobby;
-            	}
-            	if(this.player2.isInterrupted())
-            	{
-            		this.player2 = new ClientHandle(this.serverSocket);
-            		this.player2.setName("Player2");
-            		this.player2.start();
-            		this.currentDisplay = display.Lobby;
+            		this.players[i].setDisplay(this.backgrounds[i].getData());
+            		if(this.players[i].isInterrupted())
+                	{
+                		this.players[i] = new ClientHandle(this.serverSocket);
+                		this.players[i].setName("Player" + String.valueOf(i + 1));
+                		this.players[i].start();
+                		this.currentDisplay = display.Lobby;
+                	}
             	}
             }
         }
@@ -403,10 +356,9 @@ public class Server extends Functionalities
     {
     	try
     	{
-    		if(this.player1 != null)
-    			this.player1.end();
-    		if(this.player2 != null)
-    			this.player2.end();
+    		for(ClientHandle player : this.players)
+    			if(player != null)
+    				player.end();
     		if(this.serverSocket != null)
     			this.serverSocket.close();
 		}

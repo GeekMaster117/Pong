@@ -207,5 +207,7 @@ public class Master extends Functionalities
 					break;
 			}
 		}
+		
+		Functionalities.endListener();
 	}
 }
