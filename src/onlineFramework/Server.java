@@ -45,6 +45,8 @@ public class Server extends Functionalities
     private int[] selectPointers;
     private boolean[] readyStatus;
     
+    private int[] scores;
+    
     private void displayServerIP(Canvas background)
 	{
 		String str = "Server Hosted on Address: " + this.getIPV4();
@@ -128,6 +130,35 @@ public class Server extends Functionalities
 				0,
 				this.getMiddleXPosition(background.getWidth(), 1),
 				background.getHeight() - 1);
+		
+		background.insertChar(
+				Character.forDigit(this.scores[0], 
+						10), 
+				this.getMiddleXPosition(background.getWidth(), 
+						1) - 2, 
+				1);
+		background.insertChar(
+				Character.forDigit(this.scores[1], 
+						10), 
+				this.getMiddleXPosition(background.getWidth(), 
+						1) + 2, 
+				1);
+	}
+	
+	private void startBallSimulation(Entity ball, int delay)
+	{
+		Thread ballSimulation = new Thread(() -> {
+			try
+			{
+				Thread.sleep(delay);
+				ball.startSimluation();
+			} 
+			catch (InterruptedException e) 
+			{
+				e.printStackTrace();
+			}
+		});
+		ballSimulation.start();
 	}
 	
 	private void startGame()
@@ -159,7 +190,7 @@ public class Server extends Functionalities
 				this.selectPointers[i] = 0;
 			}
 			
-			this.ball.startSimluation();
+			this.startBallSimulation(this.ball, 1000);
 		}
 	}
 	
@@ -216,7 +247,7 @@ public class Server extends Functionalities
 	
 	private void handleBallTrajectory(Entity ball, Entity paddle)
 	{
-		if(!ball.detectCollision(paddle))
+		if(!ball.detectCollisionLeft(paddle) && !ball.detectCollisionRight(paddle))
 			return;
 		if((ball.getXPosition() - paddle.getXPosition()) * ball.getHorVelocity() > 0)
 			return;
@@ -234,6 +265,34 @@ public class Server extends Functionalities
 		
 		ball.setVerVelocity(ball.getVerVelocity() + paddleVerVelocityChange);
 	}
+	
+	private void checkBallOutOfBounds(Entity ball, int lowerBound, int upperBound)
+	{
+		if(ball.getXPosition() < lowerBound || ball.getXPosition() > upperBound)
+		{
+			ball.stopSimulation();
+			
+			if(ball.getXPosition() < lowerBound)
+			{
+				++this.scores[1];
+				ball.setHorVelocity(-10);
+			}
+			else
+			{
+				++this.scores[0];
+				ball.setHorVelocity(10);
+			}
+			
+			this.ball.setPosition(this.getMiddleXPosition(this.backgrounds[0].getWidth(), 
+					1), 
+			this.getMiddleYPosition(this.backgrounds[0].getHeight(), 
+					1)
+			);
+			this.ball.setVerVelocity(0);
+			
+			this.startBallSimulation(this.ball, 1000);
+		}
+	}
     
     public void start()
     {
@@ -241,9 +300,10 @@ public class Server extends Functionalities
     	this.backgrounds = new Canvas[2];
     	this.paddles = new Entity[2];
     	this.ball = new Entity();
-    	this.walls = new Entity[4];
+    	this.walls = new Entity[2];
     	this.selectPointers = new int[2];
     	this.readyStatus = new boolean[2];
+    	this.scores = new int[2];
     	
         try
         {	
@@ -252,19 +312,25 @@ public class Server extends Functionalities
         	for(int i = 0; i < 2; ++i)
         	{
         		this.backgrounds[i] = new Canvas(120, 30);
-        		
         		this.paddles[i] = new Entity();
+        		this.walls[i] = new Entity();
+        	}
+        	
+        	for(int i = 0; i < 2; ++i)
+        	{
         		this.paddles[i].setDimensions(1, 5);
-        		this.paddles[i].setPosition((i == 0) ? 1 : this.backgrounds[i].getWidth() - 2, 
+        		this.paddles[i].setPosition((i == 0) ? 0 : this.backgrounds[i].getWidth() - 1, 
             			this.getMiddleYPosition(this.backgrounds[i].getHeight(), this.paddles[i].getHeight()));
         		this.paddles[i].setPaintChar((i == 0) ? ']' : '[');
         	}
-        	for(int i = 0; i < 4; ++i)
-        		this.walls[i] = new Entity();
         	
         	this.ball.setPaintChar('*');
-        	this.ball.setPosition(60, 15);
-			this.ball.setHorVelocity(-6);
+        	this.ball.setPosition(this.getMiddleXPosition(this.backgrounds[0].getWidth(), 
+        					1), 
+        			this.getMiddleYPosition(this.backgrounds[0].getHeight(), 
+        					1)
+        			);
+			this.ball.setHorVelocity(-10);
 			
 			this.walls[0].setPaintChar('-');
 			this.walls[0].setPosition(0, 0);
@@ -273,14 +339,6 @@ public class Server extends Functionalities
 			this.walls[1].setPaintChar('-');
 			this.walls[1].setPosition(0, this.backgrounds[0].getHeight() - 1);
 			this.walls[1].setWidth(this.backgrounds[0].getWidth());
-			
-			this.walls[2].setPaintChar('|');
-			this.walls[2].setPosition(0, 1);
-			this.walls[2].setHeight(this.backgrounds[0].getHeight() - 2);
-			
-			this.walls[3].setPaintChar('|');
-			this.walls[3].setPosition(this.backgrounds[0].getWidth() - 1, 1);
-			this.walls[3].setHeight(this.backgrounds[0].getHeight() - 2);
 			
 			for(int i = 0; i < 2; ++i)
 			{
@@ -291,7 +349,7 @@ public class Server extends Functionalities
             this.players[0].start();
             try 
             {
-				Thread.sleep(100);
+				Thread.sleep(500);
 			}
             catch (InterruptedException e)
             {
@@ -306,12 +364,15 @@ public class Server extends Functionalities
             	
             	if(this.currentDisplay == display.Lobby)
             	{
+            		for(ClientHandle player : this.players)
+            		{
+            			this.handleLobbyInput(player.getPlayerInput(), player);
+                		player.setPlayerInput(null);
+            		}
+            		
             		for(int i = 0; i < 2; ++i)
             		{
-            			this.handleLobbyInput(this.players[i].getPlayerInput(), this.players[i]);
-                		this.players[i].setPlayerInput(null);
-                		
-                		this.displayServerIP(this.backgrounds[i]);
+            			this.displayServerIP(this.backgrounds[i]);
                 		this.displayLobby(this.backgrounds[i]);
                 		
                 		for(int j = 0; j < LobbySelect.values().length; ++j)
@@ -331,22 +392,30 @@ public class Server extends Functionalities
             				this.handleLevelInput(this.players[i].getPlayerInput(), this.paddles[i]);
             		}
                     
+            		for(Canvas background : this.backgrounds)
+            		{
+            			this.displayLevel(background);
+            			
+            			Entity.displayEntities(this.paddles, background);
+            			Entity.displayEntities(this.walls, background);
+            		}
+            		
             		for(int i = 0; i < 2; ++i)
             		{
-            			this.displayLevel(this.backgrounds[i]);
-            			
-            			Entity.displayEntities(this.paddles, this.backgrounds[i]);
-            			Entity.displayEntities(this.walls, this.backgrounds[i]);
-            			
             			this.ball.undoClipping(this.paddles[i], 3, false);
+            			this.ball.undoClipping(this.walls[i], 3, false);
+            		}	
             			
-            			this.handleBallTrajectory(this.ball, this.paddles[i]);
+            		this.checkBallOutOfBounds(this.ball, 0, this.backgrounds[0].getWidth() - 1);
             			
-            			this.ball.bounceOfMultiple(this.paddles);
-            			this.ball.bounceOfMultiple(this.walls);
-            			
-            			this.ball.displayEntity(this.backgrounds[i]);
-            		}
+            		for(Entity paddle : this.paddles)	
+            			this.handleBallTrajectory(this.ball, paddle);
+            		
+            		this.ball.bounceOfMultiple(this.paddles);
+        			this.ball.bounceOfMultiple(this.walls);
+        			
+        			for(Canvas background : this.backgrounds)
+        				this.ball.displayEntity(background);
             	}
             	
             	for(int i = 0; i < 2; ++i)
