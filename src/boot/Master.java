@@ -140,12 +140,12 @@ public class Master extends Functionalities
 	
 	public static void main(String[] args)
 	{
-//		String launchFromEXE = System.getenv("LAUNCH_FROM_EXE");
-//		if(launchFromEXE == null || !launchFromEXE.equals("true"))
-//		{
-//			System.out.println("Start it from Pong.exe");
-//			return;
-//		}
+		String launchFromEXE = System.getenv("LAUNCH_FROM_EXE");
+		if(launchFromEXE == null || !launchFromEXE.equals("true"))
+		{
+			System.out.println("Start it from Pong.exe");
+			return;
+		}
 		
 		Master.garbageCollector = new Thread(() -> {
 			while(!Master.garbageCollector.isInterrupted())
