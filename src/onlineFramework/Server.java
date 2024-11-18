@@ -158,6 +158,7 @@ public class Server extends Functionalities
 				e.printStackTrace();
 			}
 		});
+		ballSimulation.setName("Ball Simulation Starter");
 		ballSimulation.start();
 	}
 	
@@ -270,7 +271,7 @@ public class Server extends Functionalities
 	{
 		if(ball.getXPosition() < lowerBound || ball.getXPosition() > upperBound)
 		{
-			ball.stopSimulation();
+			this.ball.stopSimulation();
 			
 			if(ball.getXPosition() < lowerBound)
 			{
@@ -423,6 +424,7 @@ public class Server extends Functionalities
             		this.players[i].setDisplay(this.backgrounds[i].getData());
             		if(this.players[i].isInterrupted())
                 	{
+            			this.ball.stopSimulation();
                 		this.players[i] = new ClientHandle(this.serverSocket);
                 		this.players[i].setName("Player" + String.valueOf(i + 1));
                 		this.players[i].start();
